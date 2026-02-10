@@ -1,0 +1,69 @@
+digraph ExecutionStatus {
+    rankdir=TB;
+    bgcolor="white";
+    label="Execution Status State Machine";
+    labelloc="t";
+    fontname="Helvetica-Bold";
+    fontsize=20;
+    pad=0.5;
+    nodesep=0.6;
+    ranksep=0.8;
+
+    node [
+        shape=box,
+        style="filled,rounded",
+        fillcolor="#D6E4F0",
+        color="#4A7DB5",
+        fontname="Helvetica",
+        fontsize=12,
+        penwidth=1.5,
+        margin="0.15,0.1"
+    ];
+
+    edge [
+        fontname="Helvetica",
+        fontsize=10,
+        color="#4A7DB5",
+        penwidth=1.2
+    ];
+
+    // Start/end pseudo-nodes
+    start [shape=circle, label="", width=0.25, height=0.25, fillcolor="black", color="black"];
+    end [shape=doublecircle, label="", width=0.2, height=0.2, fillcolor="white", color="black", penwidth=2];
+
+    // Main states
+    idle [label=<<b>idle</b><br/><font point-size="9" color="#555555">Awaiting work</font>>];
+    starting [label=<<b>starting</b><br/><font point-size="9" color="#555555">Initializing loop</font>>];
+    running [label=<<b>running</b><br/><font point-size="9" color="#555555">Prompt loop active</font>>];
+    completing [label=<<b>completing</b><br/><font point-size="9" color="#555555">Finishing up</font>>];
+    completed [label=<<b>completed</b><br/><font point-size="9" color="#555555">Loop done</font>>];
+
+    // Cancellation states
+    cancel_requested [label=<<b>cancel_requested</b><br/><font point-size="9" color="#555555">Stop requested</font>>, fillcolor="#FFF3CD", color="#D4A017"];
+    cancelling [label=<<b>cancelling</b><br/><font point-size="9" color="#555555">Shutting down loop</font>>, fillcolor="#FFF3CD", color="#D4A017"];
+    cancelled [label=<<b>cancelled</b><br/><font point-size="9" color="#555555">Loop aborted</font>>, fillcolor="#FFF3CD", color="#D4A017"];
+
+    // Failed state
+    failed [label=<<b>failed</b><br/><font point-size="9" color="#555555">Loop crashed</font>>, fillcolor="#F8D7DA", color="#C0392B"];
+
+    // Happy path
+    start -> idle;
+    idle -> starting [label="spawn / wake"];
+    starting -> running [label="loop begins"];
+    running -> completing [label="LLM done"];
+    completing -> completed [label="cleanup done"];
+    completed -> idle [label="reset"];
+
+    // Cancellation path
+    running -> cancel_requested [label="cancel()"];
+    cancel_requested -> cancelling [label="loop stopping"];
+    cancelling -> cancelled [label="loop stopped"];
+    cancelled -> idle [label="reset"];
+
+    // Failure path
+    running -> failed [label="crash / error", color="#C0392B", fontcolor="#C0392B"];
+    failed -> idle [label="reset", color="#C0392B", fontcolor="#C0392B"];
+
+    // Terminal
+    idle -> end [style=dashed, label="shutdown", color="#888888", fontcolor="#888888"];
+}
