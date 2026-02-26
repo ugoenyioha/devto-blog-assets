@@ -1,0 +1,26 @@
+C4Container
+  title Agentic Software Factory — Container View
+
+  Person(human, "Engineer", "Triggers debates, reviews, merge decisions")
+
+  System_Boundary(factory, "Agentic Factory") {
+    Container(gitea, "Gitea", "Git VCS", "Issues, comments, PRs, timelines. Source of truth for all decisions.")
+    Container(orchestrator, "Gitea Actions", "CI Workflows", "Event routing, lane dispatch, artifact passing, retry + identity enforcement")
+    Container(a2a, "A2A Endpoint", "Agent-to-Agent Protocol", "Standardized model invocation with blocking responses")
+
+    Container_Boundary(lanes, "Model Lanes") {
+      Container(claude, "Claude Opus 4", "Anthropic API", "Architecture / Quality review")
+      Container(gemini, "Gemini 3.1 Pro", "Google API", "QA / Design review")
+      Container(codex, "GPT-5.3 Codex", "OpenAI API", "SecOps / Implementation")
+    }
+  }
+
+  Rel(human, gitea, "Issue comments, PR triggers")
+  Rel(gitea, orchestrator, "Webhook events")
+  Rel(orchestrator, a2a, "A2A message:send per lane")
+  Rel(a2a, claude, "Dispatch with role prompt")
+  Rel(a2a, gemini, "Dispatch with role prompt")
+  Rel(a2a, codex, "Dispatch with role prompt")
+  Rel(claude, gitea, "Comments via lane token")
+  Rel(gemini, gitea, "Comments via lane token")
+  Rel(codex, gitea, "Comments via lane token")

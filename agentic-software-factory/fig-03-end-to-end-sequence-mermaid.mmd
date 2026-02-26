@@ -1,0 +1,63 @@
+sequenceDiagram
+  participant H as Engineer
+  participant G as Gitea
+  participant W as Workflow
+  participant C as Claude
+  participant Ge as Gemini
+  participant Co as Codex
+  participant M as Moderator
+
+  H->>G: Open Issue #35 + debate brief
+  H->>G: Comment: @claude @gemini @codex debate
+
+  Note over W: Round 1 — Parallel Independent Analysis
+  G->>W: Webhook triggers debate workflow
+  par
+    W->>C: A2A dispatch (quality guardian prompt)
+    W->>Ge: A2A dispatch (architect prompt)
+    W->>Co: A2A dispatch (implementer prompt)
+  end
+  C->>G: Round 1 position (via claude token)
+  Ge->>G: Round 1 position (via gemini token)
+  Co->>G: Round 1 position (via codex token)
+
+  Note over W: Round 2 — Cross-Pollination + Challenge
+  W->>W: Collect Round 1 artifacts
+  par
+    W->>C: A2A dispatch + all R1 context
+    W->>Ge: A2A dispatch + all R1 context
+    W->>Co: A2A dispatch + all R1 context
+  end
+  C->>G: Round 2 challenges + refined position
+  Ge->>G: Round 2 concession + revised position
+  Co->>G: Round 2 tightened position
+
+  Note over W: Round 3 — Final Positions + Defended Dissent
+  W->>W: Collect Round 1-2 artifacts
+  par
+    W->>C: A2A dispatch + all prior context
+    W->>Ge: A2A dispatch + all prior context
+    W->>Co: A2A dispatch + all prior context
+  end
+
+  W->>M: Synthesize all 3 rounds
+  M->>G: Moderator summary (consensus table)
+
+  Note over G: Implementation Phase
+  H->>G: Comment: @codex implement this issue
+  Co->>G: Opens PR #38 (7 files, 654 lines)
+
+  Note over W: Tri-Lane Review
+  G->>W: PR event triggers review workflow
+  par
+    W->>C: Code-review (read-only analysis)
+    W->>Ge: Code-review (read-only analysis)
+    W->>Co: Code-review (read-only analysis)
+  end
+  Note over W: Post-review (publish with identity validation)
+  C->>G: Review findings (via claude token)
+  Co->>G: Review findings (via codex token)
+
+  W->>M: Synthesize lane findings
+  M->>G: Review synthesis (P0/P1/P2 actions)
+  H->>G: Merge decision
